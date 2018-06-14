@@ -436,7 +436,7 @@ class OpenNebula:
     def vm_destroy(self, vm_info):
         logging.debug("Destroying vm: {0}".format(vm_info))
         try:
-            result = self.command("onevm", "terminate", str(vm_info.id))
+            result = self.command("onevm", "terminate", "--hard", str(vm_info.id))
         except Exception as e:
             raise Exception("Error while running command (reason : {0})".format(e))
 
