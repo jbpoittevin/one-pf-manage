@@ -66,7 +66,7 @@ class VmDisk:
     def from_one_xml(disk_elem):
         # <DISK>
         #     <IMAGE><![CDATA[ttylinux]]></IMAGE>
-        #     <SIZE_MB><![CDATA[256]]></SIZE_MB>
+        #     <SIZE><![CDATA[256]]></SIZE>
         #     <IMAGE_UNAME><![CDATA[serveradmin]]></IMAGE_UNAME>
         #     <DEV_PREFIX><![CDATA[256]]></DEV_PREFIX>
         disk = VmDisk()
@@ -80,7 +80,7 @@ class VmDisk:
         if value is not None:
             disk.image = "{0}[{1}]".format(value.text, disk.image)
         # extract size
-        value = disk_elem.find("SIZE_MB")
+        value = disk_elem.find("SIZE")
         if value is not None:
             disk.size_mb = int(value.text)
         # extract dev_prefix
