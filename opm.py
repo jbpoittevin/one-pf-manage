@@ -141,6 +141,10 @@ class VmInfo:
         #       <NIC_ID>0</NIC_ID>
         #     </NIC>
         #     <VCPU><![CDATA[1]]></VCPU>
+        #     <OS>
+        #       <ARCH><![CDATA[256]]></ARCH>
+        #       <BOOT><![CDATA[256]]></BOOT>
+        #     </OS>
         # </VM>
         vm = VmInfo()
         # logging.debug("Xml: {0}".format(ElementTree.tostring(vm_elem)))
@@ -182,6 +186,14 @@ class VmInfo:
         value = vm_elem.find("TEMPLATE/MEMORY")
         if value is not None:
             vm.mem_mb = int(value.text)
+        # extract arch
+        value = vm_elem.find("TEMPLATE/OS/ARCH")
+        if value is not None:
+            vm.arch = value.text
+        # extract boot
+        value = vm_elem.find("TEMPLATE/OS/BOOT")
+        if value is not None:
+            vm.boot = value.text
         # extract networks
         value = vm_elem.findall("TEMPLATE/NIC")
         if value is not None:
@@ -213,12 +225,14 @@ class VmInfo:
         logging.debug("Parsed: {0}".format(vm))
         return vm
 
-    def __init__(self, name=None, cpu=None, vcpu=None, mem_mb=None, networks=None, disks=None, one_template=None, group=None, permissions=None, vm_id=None, state=None):
+    def __init__(self, name=None, cpu=None, vcpu=None, mem_mb=None, arch=None, boot=None, networks=None, disks=None, one_template=None, group=None, permissions=None, vm_id=None, state=None):
         # configuration
         self.name = name
         self.cpu = cpu
         self.vcpu = vcpu
         self.mem_mb = mem_mb
+        self.arch = arch
+        self.boot = boot
         self.networks = networks
         self.disks = disks
         self.one_template = one_template
@@ -229,19 +243,21 @@ class VmInfo:
         self.state = state
 
     def __repr__(self):
-        return "VmInfo(name={0}, cpu={1}, vcpu={2}, mem_mb={3}, networks={4}, disks={5}, one_template={6}, group={7}, permissions={8}, id={9}, state={10})".format(self.name, self.cpu, self.vcpu, self.mem_mb, self.networks, self.disks, self.one_template, self.group, self.permissions, self.id, self.state)
+        return "VmInfo(name={0}, cpu={1}, vcpu={2}, mem_mb={3}, arch={4}, boot={5}, networks={6}, disks={7}, one_template={8}, group={9}, permissions={10}, id={11}, state={12})".format(self.name, self.cpu, self.vcpu, self.mem_mb, self.arch, self.boot, self.networks, self.disks, self.one_template, self.group, self.permissions, self.id, self.state)
 
     def pretty_tostring(self):
         disks = self.disks
         if disks is None:
             disks = []
-        return "name: {0}\n\tgroup: {1}\n\tpermissions: {2}\n\tcpu: {3}\n\tvcpu: {4}\n\tmem_mb: {5}\n\tone_template: {6}\n\tnetworks: {7}{8}\n\tdisks: {9}{10}".format(
+        return "name: {0}\n\tgroup: {1}\n\tpermissions: {2}\n\tcpu: {3}\n\tvcpu: {4}\n\tmem_mb: {5}\n\tarch: {6}\n\tboot: {7}\n\tone_template: {8}\n\tnetworks: {9}{10}\n\tdisks: {11}{12}".format(
             self.name,
             self.group,
             self.permissions,
             self.cpu,
             self.vcpu,
             self.mem_mb,
+            self.arch,
+            self.boot,
             self.one_template,
             len(self.networks),
             "".join([ "\n\t\t{0}".format(name) for name in self.networks]),
@@ -264,6 +280,16 @@ class VmInfo:
         try:
             self.mem_mb = params['mem_mb']
             logging.debug("mem_mb overridden to {0}".format(self.mem_mb))
+        except KeyError:
+            pass
+        try:
+            self.arch = params['arch']
+            logging.debug("arch overridden to {0}".format(self.arch))
+        except KeyError:
+            pass
+        try:
+            self.boot = params['boot']
+            logging.debug("boot overridden to {0}".format(self.boot))
         except KeyError:
             pass
         try:
@@ -313,6 +339,10 @@ class VmInfo:
             differences['vcpu_count'] = [self.vcpu, target.vcpu]
         if self.mem_mb != target.mem_mb:
             differences['mem_mb'] = [self.mem_mb, target.mem_mb]
+        if self.arch != target.arch:
+            differences['arch'] = [self.arch, target.arch]
+        if self.boot != target.boot:
+            differences['boot'] = [self.boot, target.boot]
         if self.networks != target.networks:
             differences['networks'] = [self.networks, target.networks]
         if self.disks is not None and target.disks is not None and len(self.disks) != len(target.disks):
@@ -422,6 +452,12 @@ class OpenNebula:
                 "--cpu", str(vm_info.cpu),
                 "--vcpu", str(vm_info.vcpu),
                 "--memory", "{0}m".format(vm_info.mem_mb)]
+        if vm_info.arch is not None:
+            args.append("--arch")
+            args.append(vm_info.arch)
+        if vm_info.boot is not None:
+            args.append("--boot")
+            args.append(vm_info.boot)
         if len(vm_info.networks) > 0:
             args.append("--nic")
             args.append(",".join(vm_info.networks))
