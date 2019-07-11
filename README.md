@@ -22,6 +22,9 @@ The principle is the following :
 
 - the `platform_name` defines the prefix for all VM name. It *CANNOT* be empty, or every accessible VM in OpenNebula would be considered part of the platform.
 - the `hosts` element lists all desired VMs ; each VM name will be prefixed with `platform_name`, followed by a dash `-`, followed by the host name
+- a special attribute `platform_is_domain` can be set to `true` to use the
+  `platform_name` as a suffix, host name and platform name being separated by a
+dot `.`.
 
 Each host has a "desired" configuration, based on a succession of overrides, with the following precedence :
 
