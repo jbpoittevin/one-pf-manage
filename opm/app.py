@@ -156,7 +156,7 @@ class App:
 
         if self.args.limit:
             current = current.intersection(self.args.limit)
-            target = target.intersaction(self.args.limit)
+            target = target.intersection(self.args.limit)
 
         missing = target.difference(current)
         present = target.intersection(current)
