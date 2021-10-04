@@ -153,9 +153,15 @@ class App:
         # compute sets for actions
         current = set(self.existing.keys())
         target = set(self.target.keys())
+
+        if self.args.limit:
+            current = current.intersection(self.args.limit)
+            target = target.intersaction(self.args.limit)
+
         missing = target.difference(current)
         present = target.intersection(current)
         unreferenced = current.difference(target)
+
         if self.args.action == "status":
             for vm_name in sorted(missing):
                 print("{0}: missing".format(self.target[vm_name].name))

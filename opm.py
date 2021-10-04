@@ -15,6 +15,9 @@ def main():
     try:
         parser = argparse.ArgumentParser(description="one-pf-manage")
         parser.add_argument("-l", "--log-level", metavar="LVL", choices=["critical", "error", "warning", "info", "debug"], default="warning")
+        parser.add_argument("--limit", action="append",
+            help="Limit action to specified systems. May be specified multiple"
+            " times to extend the limitation to several systems.")
         parser.add_argument("action", choices=["status", "create-missing", "synchronize", "delete-unreferenced", "delete-all", "parse-only"], default="status")
         parser.add_argument("jsonfile", nargs='+')
         args = parser.parse_args()
